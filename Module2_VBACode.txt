@@ -1,0 +1,75 @@
+Sub stocks()
+
+Dim stockticker As String
+
+Dim yearlyopen As Double
+Dim yearlyclose As Double
+Dim increase As Double
+Dim increasepect As Double
+
+Dim lastrow As Long
+Dim volumetotal As Double
+    
+Dim summarytablerow As Integer
+    
+For Each ws In ThisWorkbook.Worksheets
+    'reset variables
+    summarytablerow = 1
+
+
+    lastrow = ws.Cells(Rows.Count, 1).End(xlUp).Row
+    
+    ws.Cells(summarytablerow, 9).Value = "Ticker"
+    ws.Cells(summarytablerow, 10).Value = "Yearly Change"
+    ws.Cells(summarytablerow, 11).Value = "Percent Change"
+    ws.Cells(summarytablerow, 12).Value = "Total Stock Volume"
+    
+    For i = 2 To lastrow
+    
+        If ws.Cells(i, 1).Value <> ws.Cells(i + 1, 1).Value Then 'lastrow of group
+            'get close price
+            yearlyclose = ws.Cells(i, 6).Value
+            'get change in price
+            increase = yearlyclose - yearlyopen
+            'get change percent
+            increasepect = increase / yearlyopen
+            'get last stock volume
+            volumetotal = volumetotal + ws.Cells(i, 7).Value
+            
+            'write to summary
+            summarytablerow = summarytablerow + 1
+            ws.Cells(summarytablerow, 9).Value = stockticker
+            ws.Cells(summarytablerow, 10).Value = increase
+            ws.Cells(summarytablerow, 11).Value = increasepect
+            ws.Cells(summarytablerow, 12).Value = volumetotal
+            
+            'setformat
+            If ws.Cells(summarytablerow, 10).Value >= 0 Then
+                ws.Cells(summarytablerow, 10).Interior.ColorIndex = 4
+            Else
+                ws.Cells(summarytablerow, 10).Interior.ColorIndex = 3
+            
+            End If
+            
+            
+        ElseIf ws.Cells(i, 1).Value <> ws.Cells(i - 1, 1) Then 'firstrow of group
+            'get stockticker
+            stockticker = ws.Cells(i, 1).Value
+            
+            'get open price
+            yearlyopen = ws.Cells(i, 3).Value
+            'get stockvolume
+            volumetotal = ws.Cells(i, 7).Value
+            
+         Else  'in middle of group
+            'add stock volume
+            volumetotal = volumetotal + ws.Cells(i, 7).Value
+        
+        End If
+
+        
+    Next i
+        
+Next ws
+
+End Sub
